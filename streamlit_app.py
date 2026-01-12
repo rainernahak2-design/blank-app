@@ -1,73 +1,71 @@
 import streamlit as st
 import math
 import numpy as np
+import matplotlib.pyplot as plt
 import pandas as pd
-import plotly.graph_objects as go
 
-# ======================
-# PAGE CONFIG
-# ======================
+# =============================
+# Page Config
+# =============================
 st.set_page_config(
     page_title="Bisection Solver",
-    page_icon="⚡",
-    layout="wide"
+    page_icon="📈",
+    layout="centered"
 )
 
-# ======================
-# CUSTOM CSS (PREMIUM UI)
-# ======================
+# =============================
+# Custom Dark Style (CSS)
+# =============================
 st.markdown("""
 <style>
-.stApp {
-    background: radial-gradient(circle at top left, #0f172a, #020617);
+body {
+    background: linear-gradient(135deg, #0f172a, #020617);
     color: white;
 }
 
-.hero {
-    text-align: center;
-    padding: 2rem 1rem;
+.stApp {
+    background: linear-gradient(135deg, #0f172a, #020617);
 }
 
-.hero h1 {
-    font-size: 3rem;
-    background: linear-gradient(to right, #6366f1, #8b5cf6);
-    -webkit-background-clip: text;
-    -webkit-text-fill-color: transparent;
+h1, h2, h3, label {
+    color: #f8fafc !important;
 }
 
-.hero p {
-    color: #94a3b8;
-    font-size: 1.1rem;
+div[data-baseweb="input"] > div {
+    background-color: #1e293b;
 }
 
-.card {
-    background: rgba(255,255,255,0.03);
-    border: 1px solid rgba(255,255,255,0.08);
-    padding: 1.5rem;
-    border-radius: 20px;
-    backdrop-filter: blur(12px);
-    box-shadow: 0 10px 30px rgba(0,0,0,0.4);
+div[data-baseweb="input"] input {
+    color: white;
 }
 
 .stButton button {
     background: linear-gradient(135deg, #6366f1, #8b5cf6);
     color: white;
-    border-radius: 14px;
-    height: 50px;
-    font-weight: 600;
+    border-radius: 12px;
+    height: 45px;
+    font-weight: bold;
     border: none;
 }
 
 .stButton button:hover {
-    transform: scale(1.03);
+    transform: scale(1.02);
     transition: 0.2s ease;
+}
+
+.block-container {
+    padding-top: 2rem;
+}
+
+.css-1d391kg {
+    background-color: #020617;
 }
 </style>
 """, unsafe_allow_html=True)
 
-# ======================
-# MATH FUNCTIONS
-# ======================
+# =============================
+# Fungsi matematika
+# =============================
 def f(x, expr):
     return eval(expr, {"x": x, "math": math})
 
@@ -76,7 +74,7 @@ def bisection(expr, a, b, eps, max_iter=100):
     i = 1
 
     if f(a, expr) * f(b, expr) >= 0:
-        raise ValueError("f(a) dan f(b) harus berbeda tanda")
+        raise ValueError("f(a) dan f(b) harus berbeda tanda!")
 
     while abs(b - a) > eps and i <= max_iter:
         c = (a + b) / 2
@@ -93,87 +91,75 @@ def bisection(expr, a, b, eps, max_iter=100):
 
     return c, data
 
-# ======================
-# HERO SECTION
-# ======================
-st.markdown("""
-<div class="hero">
-    <h1>⚡ Bisection Method Solver</h1>
-    <p>Web app numerik modern untuk mencari akar persamaan non-linear</p>
-</div>
-""", unsafe_allow_html=True)
+# =============================
+# Header
+# =============================
+st.markdown("<h1 style='text-align:center;'>📈 Bisection Method Solver</h1>", unsafe_allow_html=True)
+st.markdown("<p style='text-align:center; color:#94a3b8;'>Aplikasi numerik untuk mencari akar persamaan non-linear</p>", unsafe_allow_html=True)
 
-# ======================
-# INPUT CARD
-# ======================
-with st.container():
-    st.markdown('<div class="card">', unsafe_allow_html=True)
+st.markdown("---")
 
-    col1, col2, col3, col4 = st.columns(4)
+# =============================
+# Input Layout
+# =============================
+col1, col2 = st.columns(2)
 
-    with col1:
-        fungsi = st.text_input("Fungsi f(x)", "x**3 - x - 2")
-    with col2:
-        a = st.number_input("Nilai a", value=1.0)
-    with col3:
-        b = st.number_input("Nilai b", value=2.0)
-    with col4:
-        eps = st.number_input("Toleransi", value=0.0001, format="%.6f")
+with col1:
+    fungsi = st.text_input("Fungsi f(x)", "x**3 - x - 2")
+    a = st.number_input("Nilai a", value=1.0)
 
-    tengah = st.columns(3)
-    with tengah[1]:
-        proses = st.button("🚀 Jalankan Perhitungan", use_container_width=True)
+with col2:
+    b = st.number_input("Nilai b", value=2.0)
+    eps = st.number_input("Toleransi", value=0.0001, format="%.6f")
 
-    st.markdown('</div>', unsafe_allow_html=True)
+st.markdown("")
 
-# ======================
-# OUTPUT
-# ======================
+# Tombol tengah
+center_btn = st.columns(3)
+with center_btn[1]:
+    proses = st.button("🚀 Proses Perhitungan", use_container_width=True)
+
+# =============================
+# Output
+# =============================
 if proses:
     try:
         akar, tabel = bisection(fungsi, a, b, eps)
         df = pd.DataFrame(tabel, columns=["Iterasi", "a", "b", "c", "f(c)"])
 
-        st.markdown("## 📊 Hasil Perhitungan")
+        st.markdown("### ✅ Hasil Perhitungan")
+        st.success(f"Akar persamaan ≈ {akar:.6f}")
+        st.info(f"Total iterasi: {len(df)}")
 
-        m1, m2, m3 = st.columns(3)
-        m1.metric("Akar", f"{akar:.6f}")
-        m2.metric("Iterasi", len(df))
-        m3.metric("Toleransi", eps)
+        st.markdown("### 📊 Tabel Iterasi")
+        st.dataframe(df, use_container_width=True)
 
-        # Grafik interaktif (Plotly)
-        x = np.linspace(a, b, 400)
+        st.markdown("### 📈 Grafik Fungsi")
+        x = np.linspace(a, b, 300)
         y = [f(i, fungsi) for i in x]
 
-        fig = go.Figure()
-        fig.add_trace(go.Scatter(x=x, y=y, mode="lines", name="f(x)"))
-        fig.add_trace(go.Scatter(
-            x=[akar], 
-            y=[f(akar, fungsi)], 
-            mode="markers",
-            marker=dict(size=12),
-            name="Akar"
-        ))
+        fig, ax = plt.subplots(facecolor="#0f172a")
+        ax.set_facecolor("#020617")
+        ax.plot(x, y, label="f(x)")
+        ax.axhline(0, linestyle="--")
+        ax.scatter([akar], [f(akar, fungsi)], label="Akar")
+        ax.set_xlabel("x")
+        ax.set_ylabel("f(x)")
+        ax.legend()
+        ax.tick_params(colors="white")
+        for spine in ax.spines.values():
+            spine.set_color("white")
 
-        fig.update_layout(
-            template="plotly_dark",
-            title="Grafik Fungsi",
-            height=500
-        )
-
-        st.plotly_chart(fig, use_container_width=True)
-
-        with st.expander("📄 Lihat Tabel Iterasi"):
-            st.dataframe(df, use_container_width=True)
+        st.pyplot(fig)
 
     except Exception as e:
         st.error(f"❌ Error: {e}")
 
-# ======================
-# FOOTER
-# ======================
-st.markdown("""
-<p style='text-align:center; color:#64748b; margin-top:40px;'>
-Built with ❤️ using Python & Streamlit — Numerical Method Project
-</p>
-""", unsafe_allow_html=True)
+# =============================
+# Footer
+# =============================
+st.markdown("---")
+st.markdown(
+    "<p style='text-align:center; color:#64748b;'>Dibuat dengan Streamlit • Metode Numerik • Bisection</p>",
+    unsafe_allow_html=True
+)
